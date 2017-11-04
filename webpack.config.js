@@ -3,7 +3,7 @@
 
 var ExtractTextPlugin = require("extract-text-webpack-plugin");  //css单独打包
 
-module.exports = {
+module.exports = { 
     devtool: 'eval-source-map',
 
     entry: __dirname + '/src/entry.js', //唯一入口文件
