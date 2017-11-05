@@ -15,6 +15,10 @@ function getAjaxUrl(path) {
 
 function toHtml(str) {
 	//展示html内容
+	if (str) {
+		str = str.replace(/\/user\//g, '#/info/');
+		str = str.replace(/http[s]*:\/\/cnodejs.org\//g, '#/');
+	}
 	var html = {__html: str};
 	return <div dangerouslySetInnerHTML={html}></div>
 }

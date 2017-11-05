@@ -12,6 +12,7 @@ import { Info } from './pages/Info';
 import { Login } from './pages/Login';
 import { TopicNew } from './pages/TopicNew';
 import { TopicEdit } from './pages/TopicEdit';
+import { Error } from './pages/Error'
 
 
 //最终渲染
@@ -24,5 +25,6 @@ ReactDom.render((
         <Route path='/info' component={Info} />
         <Route path='/new' component={TopicNew} />
         <Route path='/edit' component={TopicEdit} />
+        <Route path='/*' component={Error} />
     </Router>
 ), document.getElementById('app'));

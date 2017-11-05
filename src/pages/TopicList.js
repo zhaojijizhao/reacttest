@@ -4,7 +4,8 @@ import React from 'react';
 import ReactDom from 'react-dom';
 import axios from 'axios';
 import scroll from '../components/common/scroll.js';
-import { topicType } from '../common/data';
+import TypeTab from '../components/topicList/typeTab.js';
+import { topicType } from '../common/data.js';
 import { getFullTime, getAjaxUrl, toHtml } from '../common/util';
 
 const topics = getAjaxUrl('topics');
@@ -15,7 +16,9 @@ var TopicList = React.createClass({
             page: 1,
             limit: 20,
             mdrender: false,
-            topics: []
+            topics: [],
+            tab: 'all',
+            isLastPage: false
         };  
     },
 	getlistInfo(add) {
@@ -25,19 +28,24 @@ var TopicList = React.createClass({
 			mdrender: this.state.mdrender,
 			limit: this.state.limit
 		};
-		if (this.state.tab) {
+		if (this.state.tab && this.state.tab != 'all') {
 			params.tab = this.state.tab;
 		}
 		return axios.get(topics, { params })
 		.then((res) => {
 			if (res.data && res.data.success && res.data.data) {
 				let topics = this.state.topics || [];
-				if (add) {
-					topics = topics.concat(res.data.data);
+				let isLastPage = this.state.isLastPage;
+				if (res.data.data.length == 0) {
+					isLastPage = true;
 				} else {
-					topics = res.data.data;
+					if (add) {
+						topics = topics.concat(res.data.data);
+					} else {
+						topics = res.data.data;
+					}
 				}
-				this.setState({ topics, isScrolling: false });
+				this.setState({ topics, isLastPage, isScrolling: false });
 			}
 		})
 		.catch(function (error) {
@@ -60,7 +68,7 @@ var TopicList = React.createClass({
 			let bodyHeight =  document.body.offsetHeight;
 			let windowHeight = window.innerHeight;
 			let loadingHeight = scrolllog.offsetHeight;
-			let ifRefreah  = (scrollHeight + windowHeight - loadingHeight) >  (bodyHeight - 20);
+			let ifRefreah  = (scrollHeight + windowHeight - loadingHeight) >  (bodyHeight - 72);
 			if (ifRefreah && !this.state.isScrolling) {
 				this.state.isScrolling = true;
 				this.state.page++;
@@ -74,6 +82,20 @@ var TopicList = React.createClass({
 	getTopicClass(item) {
 		return  (item.top || item.good) ? 'hilight tab' : 'tab';
 	},
+	resetParam() {
+		this.state.page = 1;
+        this.state.limit = 20;
+        this.state.mdrender = false;
+        this.state.tab = 'all';
+        this.state.isLastPage = false;
+	},
+	clickTab(key) {
+		if (key != this.state.tab) {
+			this.resetParam();
+			this.state.tab = key;
+			this.getlistInfo();
+		}
+	},
 	toDetail(id) {
 		location.href = "#/detail/" + id;
 	},
@@ -81,6 +103,10 @@ var TopicList = React.createClass({
         return (
             <div>
             	<div className="topic-list" id="topic-list">
+            		<TypeTab 
+            			clickTab={this.clickTab} 
+            			tab={this.state.tab}
+            		></TypeTab>
             		{
             			this.state.topics.map((v, k) => {
             				return (
@@ -108,7 +134,18 @@ var TopicList = React.createClass({
             				)
             			})
             		}
-            		<div id="scrolllog"></div>
+            		<div id="scrolllog">
+            			{
+            				this.state.isLastPage ? 
+            				(<div className="scrolllog">
+            					<div className="txt">{"已经没有更错内容了"}</div>
+            				</div>)
+            				:(<div className="scrolllog">
+        						<div className="inner"></div>
+        						<div className="txt">{"下刷新加载内容"}</div>
+        					</div>)
+            			}
+            		</div>
             	</div>
             </div>
         );
